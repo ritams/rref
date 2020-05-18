@@ -34,49 +34,53 @@ def rref(b, aug=False):
         tex = augmented(a)
     else:
         tex = sp.latex(a)
+    pivot = 0
+    flag2 = False
     for i in range(a.shape[0]):
+
+        if aug:
+            if pivot == a.shape[1] - 1: break
+        else:
+            if pivot == a.shape[1]: break
+
         text = []
         # find pivotal position
-        if a[i, i] != 0:
-            # do stuff
-            if a[i, i] != 1:
-                text.append(multiply(i, 1 / a[i, i]))
-                a[i, :] = a[i, :] / a[i, i]
-            for j in range(a.shape[0]):
-                if i != j:
-                    if a[j, i] != 0:
-                        text.append(add(i, j, -a[j, i]))
-                        a[j, :] = a[j, :] - a[i, :] * a[j, i]
-        else:
-            # swap
-            flag = True
-            for j in range(i + 1, a.shape[0]):
-                if a[j, i] != 0:
-                    # swap
-                    text.append(swap(i, j))
-                    temp = a[i, :]
-                    a[i, :] = a[j, :]
-                    a[j, :] = temp
-                    flag = False
-                    break
-            if flag:
-                break
-            else:
-                # then do stuff
-                if a[i, i] != 1:
-                    text.append(multiply(i, 1 / a[i, i]))
-                    a[i, :] = a[i, :] / a[i, i]
+        while a.shape[1] - pivot > 0:
+            if a[i, pivot] != 0:
+                # do stuff
+                if a[i, pivot] != 1:
+                    text.append(multiply(i, 1 / a[i, pivot]))
+                    a[i, :] = a[i, :] / a[i, pivot]
                 for j in range(a.shape[0]):
                     if i != j:
-                        if a[j, i] != 0:
-                            text.append(add(i, j, -a[j, i]))
-                            a[j, :] = a[j, :] - a[i, :] * a[j, i]
+                        if a[j, pivot] != 0:
+                            text.append(add(i, j, -a[j, pivot]))
+                            a[j, :] = a[j, :] - a[i, :] * a[j, pivot]
+                pivot += 1       
+                break
+            else:
+                flag = True
+                for j in range(i + 1, a.shape[0]):
+                    if a[j, pivot] != 0:
+                        # swap
+                        text.append(swap(i, j))
+                        temp = a[i, :]
+                        a[i, :] = a[j, :]
+                        a[j, :] = temp
+                        flag = False
+                        break
+                if flag:
+                    pivot += 1
+                    if aug and pivot == a.shape[1] - 1:
+                        flag2 = True
+                        break
+        if flag2: break
 
         n = len(text)
         up_stack = "\substack { "
         down_stack = "\substack { "
         for i in range(n):
-            if i < int(n / 2):
+            if i < round(n / 2):
                 up_stack += text[i]
             else:
                 down_stack += text[i]
